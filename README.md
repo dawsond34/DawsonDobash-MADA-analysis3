@@ -10,11 +10,13 @@ For our model fitting portion, the main predictor is runny nose and we explore t
 # Setup
 
 This exercise is split into 3 files which are located in the code folder:
-    processingscript.R is used to read in the data and clean the data
+ <br />
+ <br />
+    **processingscript.R** is used to read in the data and clean the data
     <br />
-    exploration.Rmd is used to do the exploration analysis
+    **exploration.Rmd** is used to do the exploration analysis
     <br />
-    analysisscript.R is where the model fitting portion is encased in
+    **analysisscript.R** is where the model fitting portion is encased in
     
 The tables and figures created within the analysisscript gets put into the results folder.
 
