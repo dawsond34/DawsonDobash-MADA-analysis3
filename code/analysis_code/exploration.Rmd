@@ -1,7 +1,7 @@
 ---
 title: "exploration"
 author: "Dawson Dobash"
-date: "10/13/2021"
+date: "10/14/2021"
 output: html_document
 ---
 
@@ -10,6 +10,7 @@ This is the exploratory analysis portion of the module-Fitting Basic Statistical
 This exploration portion will include some summary statistics for continuous variables as well as histograms to show the distribution of continuous variables. Finally we will have some plots comparing two or more variables.
 
 ```{r packages and reading in data}
+#Reading in packages needed and the data set from using the here package
 library(here)
 library(tidyverse)
 library(scales)
@@ -53,7 +54,7 @@ In this histogram, you can see that the temperatures are right skewed with most 
 <br />
 **Nausea**
 
-Here we are looking at the dta frequency of those who have Nausea and those who dont.
+Here we are looking at the data frequency of those who have Nausea and those who dont. This is expressed through a bar chart as well. 
 
 ```{r data frequency of nausea}
 summary(as.factor(data$Nausea))
@@ -87,6 +88,7 @@ Of all of the predictor variables insomnia has the most even distribution. This 
 **Body Temperature by Insomnia**
 
 ```{r }
+#This is a boxplot of body temperature by insomnia.  
 plot3 = data %>% ggplot(aes(x=BodyTemp, y=Insomnia)) + geom_boxplot() + ggtitle("Figure 3: Boxplot of Body Temperature by Insomnia")
 
 plot3
@@ -99,6 +101,7 @@ We can see that the distributions are relatively the same no matter if the perso
 **Body Temperature by Chill or Sweats**
 
 ```{r }
+#This is a boxplot of body temperature by chills or sweats.
 plot4 = data %>% ggplot(aes(x=BodyTemp, y=ChillsSweats)) + geom_boxplot() + ggtitle("Figure 4: Boxplot of Body Temperature by Chill or Sweats") + ylab("Chills or Sweats")
 
 plot4
@@ -112,6 +115,8 @@ In this boxplot, we can see there is still definetly some overlap between the tw
 **Body Temperature by Myalgia**
 
 ```{r }
+
+#This is a boxplot of body temperature by myalgia (yes or no).
 plot5 = data %>% ggplot(aes(x=BodyTemp, y=MyalgiaYN)) + geom_boxplot() + ggtitle("Figure 5: Boxplot of Body Temperature by Myalgia") + ylab("Myalgia")
 
 plot5
@@ -126,6 +131,8 @@ Similar to chills or sweats, myalgia seems to favor the lower end of body temper
 
 **Nausea by Subjective Fever**
 ```{r}
+
+#This is a stacked percentage bar plot of nausea by subjective fever. The way I did it was creating a count variable for the number of yes's and no's for nausea. This value will be used on the y-axis and turned into a percentage using the scales package.
 plot6 = data %>% select(Nausea, SubjectiveFever) %>% group_by(Nausea, SubjectiveFever) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=SubjectiveFever)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 6: Stacked Bar Chart of Nausea by Subjective Fever") +ylab("Percentage") 
   
 plot6
@@ -138,6 +145,8 @@ If we look at the stacked bar chart, we can see that there are more people who h
 **Nausea by Diarrhea**
 
 ```{r}
+
+#This is a stacked percentage bar plot of nausea by diarrhea. The way I did it was creating a count variable for the number of yes's and no's for nausea. This value will be used on the y-axis and turned into a percentage using the scales package.
 plot7 = data %>% select(Nausea, Diarrhea) %>% group_by(Nausea, Diarrhea) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=Diarrhea)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 7: Stacked Bar Chart of Nausea by Diarrhea") +ylab("Percentage") 
   
 plot7
@@ -151,6 +160,8 @@ In figure 7, we can see that around 25% of people who are nauseated also have di
 **Nausea by Myalgia**
 
 ```{r}
+
+#This is a stacked percentage bar plot of nausea by myalgia. The way I did it was creating a count variable for the number of yes's and no's for nausea. This value will be used on the y-axis and turned into a percentage using the scales package.
 plot8 = data %>% select(Nausea, MyalgiaYN) %>% group_by(Nausea, MyalgiaYN) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=MyalgiaYN)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 8: Stacked Bar Chart of Nausea by Myalgia") +ylab("Percentage") 
   
 plot8
@@ -164,6 +175,8 @@ We can see that for both those who arent and who are nauseated have relatively h
 **Nausea by Insomnia**
 
 ```{r}
+
+#This is a stacked percentage bar plot of nausea by insomnia. The way I did it was creating a count variable for the number of yes's and no's for nausea. This value will be used on the y-axis and turned into a percentage using the scales package.
 plot9 = data %>% select(Nausea, Insomnia) %>% group_by(Nausea, Insomnia) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=Insomnia)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 9: Stacked Bar Chart of Nausea by Insomnia") +ylab("Percentage") 
   
 plot9
