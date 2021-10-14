@@ -1,0 +1,173 @@
+---
+title: "exploration"
+author: "Dawson Dobash"
+date: "10/13/2021"
+output: html_document
+---
+
+This is the exploratory analysis portion of the module-Fitting Basic Statistical Models.We will be looking at data from [Brian McKay's paper](https://datadryad.org/stash/dataset/doi:10.5061/dryad.51c59zw4v). For our analysis, we are using body temperature as our continuous outcome and Nausea as our main categorical outcome. We will use the other variables within the data set to determine any correlations with the outcomes.
+
+This exploration portion will include some summary statistics for continuous variables as well as histograms to show the distribution of continuous variables. Finally we will have some plots comparing two or more variables.
+
+```{r packages and reading in data}
+library(here)
+library(tidyverse)
+library(scales)
+library(gtsummary)
+
+data <- readRDS(here::here("data/processed_data/processeddata.rds"))
+```
+
+Since there are a lot of variables to select for predicting body temperature and nausea, I will pick a couple that seem to be interesting or possibly somewhat related (at least I think). Below are the variables I will explore along with our main outcomes:
+
+_ChillsSweats_: Having Chills or Sweats (Yes or No) <br />
+_SubjectiveFever_: If a person has a subjective fever (Yes or No) <br />
+_Diarrhea_: Having diarrhea (Yes or no) <br />
+_Insomnia_: Is the person experiencing sleeplessness (Yes or No) <br />
+_MyalgiaYN_: If a person experiences myalgia (Yes or No)
+
+# Univariate Exploration
+
+### Main Outcomes
+<br />
+**Body Temperature**
+
+This is showing the summary statistics of the body temperature of each subject.
+
+```{r body temperature}
+summary(data$BodyTemp)
+```
+
+We can see that the body temperatures ranges from 97.2 and 103.1 degrees Fahrenheit with a mean temperature of 98.94 and median of 98.5. The general standard temperature is supposed to be around 98.6 but, with recent studies it seems to be lower and within the low 98's. Therefore, the 25% of people over a temperature of 99.3 might have some reasons on why their temperatures are so high.  
+
+Below is showing a histogram of body temperatures.
+
+```{r histogram of bodytemp}
+plot1 = data %>% ggplot(aes(x=BodyTemp)) + geom_histogram(binwidth = 0.5) + ggtitle("Figure 1: Histogram of Body Temperatures") + xlab("Body Temperature (in Fahrenheit)") + theme(plot.title = element_text(hjust=0.5))
+
+plot1
+```
+
+In this histogram, you can see that the temperatures are right skewed with most of the data is around 98 degrees. This is a similar result from the summary statistics as 75% of the data is under the temperature of 99.3. 
+
+<br />
+**Nausea**
+
+Here we are looking at the dta frequency of those who have Nausea and those who dont.
+
+```{r data frequency of nausea}
+summary(as.factor(data$Nausea))
+
+plot2 = data %>% select(Nausea) %>% group_by(Nausea) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count)) +geom_bar(stat="identity") +ggtitle("Figure 2: Bar Chart of Nausea") + theme(plot.title = element_text(hjust=0.5))
+
+plot2
+```
+
+We can see that there are double the amount of people who are not experiencing nausea. 
+
+### Predictor Variables
+
+This table is looking at all of the predictor variables where it is diplaying the counts of yes and the percent of the people who had a yes response.
+
+```{r}
+data %>% 
+    select(ChillsSweats, SubjectiveFever, Diarrhea, Insomnia, MyalgiaYN) %>% 
+    tbl_summary()
+```
+
+
+Of all of the predictor variables insomnia has the most even distribution. This could potentially mean that insomnia might not have an impact on our outcomes but we will have to see. We can also see that myalgia is the most one-sided predictor variable and we will see if that is due to some sort of association with either body temperature or nausea. All of these variables seem to have more yes values than no except the diarrhea variable. 
+
+<br />
+
+# Bivariate Analysis
+
+### Body Temperature vs. Predictor Variables
+
+**Body Temperature by Insomnia**
+
+```{r }
+plot3 = data %>% ggplot(aes(x=BodyTemp, y=Insomnia)) + geom_boxplot() + ggtitle("Figure 3: Boxplot of Body Temperature by Insomnia")
+
+plot3
+```
+
+We can see that the distributions are relatively the same no matter if the person experience insomnia or not.
+
+<br />
+
+**Body Temperature by Chill or Sweats**
+
+```{r }
+plot4 = data %>% ggplot(aes(x=BodyTemp, y=ChillsSweats)) + geom_boxplot() + ggtitle("Figure 4: Boxplot of Body Temperature by Chill or Sweats") + ylab("Chills or Sweats")
+
+plot4
+
+```
+
+In this boxplot, we can see there is still definetly some overlap between the two groups but people who did not experience chills and sweats seem to be more on the lower end of the body temperatures compared to this who have experienced them. However it might look to seem that no significant difference is present based on the boxplots.
+
+<br />
+
+**Body Temperature by Myalgia**
+
+```{r }
+plot5 = data %>% ggplot(aes(x=BodyTemp, y=MyalgiaYN)) + geom_boxplot() + ggtitle("Figure 5: Boxplot of Body Temperature by Myalgia") + ylab("Myalgia")
+
+plot5
+
+```
+
+Similar to chills or sweats, myalgia seems to favor the lower end of body temperatures but still with overlap. The spread of observations is smaller for those who did not experience myalgia except the outliers present.
+
+
+### Nausea vs. Prediction Variables
+
+
+**Nausea by Subjective Fever**
+```{r}
+plot6 = data %>% select(Nausea, SubjectiveFever) %>% group_by(Nausea, SubjectiveFever) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=SubjectiveFever)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 6: Stacked Bar Chart of Nausea by Subjective Fever") +ylab("Percentage") 
+  
+plot6
+
+```
+If we look at the stacked bar chart, we can see that there are more people who have a subjective fever when they are nauseated. Around 75% of people who are nauseated have subjective fevers compared to around 60% for not nauseated. 
+
+<br />
+
+**Nausea by Diarrhea**
+
+```{r}
+plot7 = data %>% select(Nausea, Diarrhea) %>% group_by(Nausea, Diarrhea) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=Diarrhea)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 7: Stacked Bar Chart of Nausea by Diarrhea") +ylab("Percentage") 
+  
+plot7
+
+```
+
+In figure 7, we can see that around 25% of people who are nauseated also have diarrhea compared to only 10% has diarrhea while not being nauseated.
+
+<br />
+
+**Nausea by Myalgia**
+
+```{r}
+plot8 = data %>% select(Nausea, MyalgiaYN) %>% group_by(Nausea, MyalgiaYN) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=MyalgiaYN)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 8: Stacked Bar Chart of Nausea by Myalgia") +ylab("Percentage") 
+  
+plot8
+
+```
+We can see that for both those who arent and who are nauseated have relatively high percentage of those who experience Myalgia. 
+
+
+<br />
+
+**Nausea by Insomnia**
+
+```{r}
+plot9 = data %>% select(Nausea, Insomnia) %>% group_by(Nausea, Insomnia) %>% summarise(count = n()) %>% ggplot(aes(x=Nausea, y=count, fill=Insomnia)) +  geom_bar(position="fill", stat="identity") + scale_y_continuous(labels=scales::percent) + ggtitle("Figure 9: Stacked Bar Chart of Nausea by Insomnia") +ylab("Percentage") 
+  
+plot9
+
+```
+
+Finally just like the boxplot of body temperature and insomnia, insomnia shares a similar relationship whether or not the person is nauseated or not. 
