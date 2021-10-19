@@ -67,13 +67,13 @@ Now that we have some predicted values, we can use the ROC and ROC_AUC to see ho
 #Fitting a roc curve and looking at the roc-auc to determine if the model is a good fit.
 
 #Using the test data set
-Nausea_aug1 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
-Nausea_aug1 %>% roc_auc(truth = Nausea, .pred_No)
+Nausea_aug1 %>% roc_curve(truth = Nausea, .pred_Yes, event_level = "second") %>% autoplot()
+Nausea_aug1 %>% roc_auc(truth = Nausea, .pred_Yes, event_level = "second")
 
 #Using the training data set
 Nausea_aug2 = augment(Nausea_fit, training)
-Nausea_aug2 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
-Nausea_aug2 %>% roc_auc(truth = Nausea, .pred_No)
+Nausea_aug2 %>% roc_curve(truth = Nausea, .pred_Yes, event_level = "second") %>% autoplot()
+Nausea_aug2 %>% roc_auc(truth = Nausea, .pred_Yes, event_level = "second")
 ```
 
 After finding out the roc value of both which hovers around the 0.75 range, this means the model will be useful and possibly good.
@@ -111,13 +111,13 @@ Nausea_aug3 = augment(Nausea_fit2, test)
 #Remember this is only using the runny nose main predictor
 
 #Using the test data set
-Nausea_aug3 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
-Nausea_aug3 %>% roc_auc(truth = Nausea, .pred_No)
+Nausea_aug3 %>% roc_curve(truth = Nausea, .pred_Yes, event_level = "second") %>% autoplot()
+Nausea_aug3 %>% roc_auc(truth = Nausea, .pred_Yes, event_level = "second")
 
 #Using the training data set
 Nausea_aug4 = augment(Nausea_fit2, training)
-Nausea_aug4 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
-Nausea_aug4 %>% roc_auc(truth = Nausea, .pred_No)
+Nausea_aug4 %>% roc_curve(truth = Nausea, .pred_Yes, event_level = "second") %>% autoplot()
+Nausea_aug4 %>% roc_auc(truth = Nausea, .pred_Yes, event_level = "second")
 ```
 
 We can see that if we only use runny nose as our predictor, the roc has a value around 0.5 which mean the model is not a good fit. 
