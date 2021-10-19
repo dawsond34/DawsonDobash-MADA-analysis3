@@ -1,0 +1,123 @@
+---
+title: "analysisscript_pt2"
+author: "Dawson Dobash"
+date: "10/19/2021"
+output: html_document
+---
+
+For this exercise, we will be using tidymodels again but we will be evaluating models we create.
+
+We will be reading in the same data cleaned from the processing script and all of the packages needed.
+
+```{r reading data and packages}
+library(here)
+library(tidymodels)
+library(dplyr)
+
+#path to data
+data_location <- here::here("data","processed_data","processeddata.rds")
+
+#load data. 
+data <- readRDS(data_location)
+```
+
+Next we will split up the data into two called the training and test where the training data will be used to create the model and the test will be to use/implement the data to see how well the model fits the data. 
+
+```{r splitting data}
+#This is splitting the data using a proportion of 1/4 test and 3/4 training
+split_data <- initial_split(data, prop = 3/4)
+
+#This is assigning acutal data sets to the ones that were made
+training <- training(split_data)
+test  <- testing(split_data)
+```
+
+Once we have our two data sets, we can now apply the recipe function to create a model from our categorical outcome with all predictors. Then we will create a logistic model for this recipe. This will all be applied to a workflow(). This workflow will be used to create a fit object for the model specified in the recipe.
+
+```{r recipe making and workflow}
+#Creating the recipe for nausea
+Nausea_recipe = recipe(Nausea ~ ., data = data)
+
+#making a path for the logistic regression models
+log_mod <- logistic_reg() %>% set_engine("glm")
+
+#Creating a workflow that adds the model type and the recipe I previously made
+Nausea_wrkflow <- workflow() %>% add_model(log_mod) %>% add_recipe(Nausea_recipe)
+
+#Creating a fit object
+Nausea_fit <- Nausea_wrkflow %>% fit(data = training)
+
+#Looking at the details of this fitted model
+Nausea_fit %>% extract_fit_parsnip() %>% tidy()
+```
+
+Now that we have a fitted object, we will apply it to the test data and predict some values.
+
+```{r predicting}
+#We are predicting the values from the test data set with our fitted model
+predict(Nausea_fit, test)
+
+#This is also doing the same thing as the predict function but it is showing the prediction proportions at each observation
+Nausea_aug1 = augment(Nausea_fit, test)
+```
+
+Now that we have some predicted values, we can use the ROC and ROC_AUC to see how well the model fits the data.
+
+```{r roc}
+#Fitting a roc curve and looking at the roc-auc to determine if the model is a good fit.
+
+#Using the test data set
+Nausea_aug1 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
+Nausea_aug1 %>% roc_auc(truth = Nausea, .pred_No)
+
+#Using the training data set
+Nausea_aug2 = augment(Nausea_fit, training)
+Nausea_aug2 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
+Nausea_aug2 %>% roc_auc(truth = Nausea, .pred_No)
+```
+
+After finding out the roc value of both which hovers around the 0.75 range, this means the model will be useful and possibly good.
+
+
+
+
+
+We will repeat these steps but only using our main predictor which was runny nose. To do this the only difference we have to make is changing the recipe.
+
+```{r repeat with just runny nose}
+#Creating the recipe for nausea
+Nausea_recipe2 = recipe(Nausea ~ RunnyNose, data = data)
+
+#Creating a workflow that adds the model type and the recipe I previously made
+Nausea_wrkflow2 <- workflow() %>% add_model(log_mod) %>% add_recipe(Nausea_recipe2)
+
+#Creating a fit object
+Nausea_fit2 <- Nausea_wrkflow2 %>% fit(data = training)
+
+#Looking at the details of this fitted model
+Nausea_fit2 %>% extract_fit_parsnip() %>% tidy()
+```
+
+Now that we have a fitted object, we will apply it to the test data and predict some values.
+
+```{r predicting and roc}
+#We are predicting the values from the test data set with our fitted model
+predict(Nausea_fit2, test)
+
+#This is also doing the same thing as the predict function but it is showing the prediction proportions at each observation
+Nausea_aug3 = augment(Nausea_fit2, test)
+
+#Fitting a roc curve and looking at the roc-auc to determine if the model is a good fit.
+#Remember this is only using the runny nose main predictor
+
+#Using the test data set
+Nausea_aug3 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
+Nausea_aug3 %>% roc_auc(truth = Nausea, .pred_No)
+
+#Using the training data set
+Nausea_aug4 = augment(Nausea_fit2, training)
+Nausea_aug4 %>% roc_curve(truth = Nausea, .pred_No) %>% autoplot()
+Nausea_aug4 %>% roc_auc(truth = Nausea, .pred_No)
+```
+
+We can see that if we only use runny nose as our predictor, the roc has a value around 0.5 which mean the model is not a good fit. 
