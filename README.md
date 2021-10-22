@@ -19,7 +19,7 @@ This exercise is split into 3 files which are located in the code folder:
     <br />
     **analysisscript.R** is where the model fitting portion is encased in
     <br /> 
-    **analysisscript_pt2.Rmd** is module 9 exercise. This is evaluating models.
+    **analysisscript_pt2.Rmd** is module 9 exercise. This is evaluating models with Monica as contributor of Module 9 part 2.
     
 The tables and figures created within the analysisscript gets put into the results folder.
 
