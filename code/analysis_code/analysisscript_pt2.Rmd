@@ -53,7 +53,7 @@ Nausea_fit %>% extract_fit_parsnip() %>% tidy()
 
 Now that we have a fitted object, we will apply it to the test data and predict some values.
 
-```{r predicting}
+```{r}
 #We are predicting the values from the test data set with our fitted model
 predict(Nausea_fit, test)
 
@@ -121,3 +121,127 @@ Nausea_aug4 %>% roc_auc(truth = Nausea, .pred_Yes, event_level = "second")
 ```
 
 We can see that if we only use runny nose as our predictor, the roc has a value around 0.5 which mean the model is not a good fit. 
+
+########################################################################
+########################################################################
+
+### Continious Outcome Additions
+
+__Monica Chan: START__
+
+Add a code that repeats the previous steps, but fits linear models to the continuous outcome.
+
+1. All predictors: BodyTemp and all predictors
+2. Just the main predictors: BodyTemp and RunnyNose
+
+NOTE: change metric. RMSE
+
+#### Data reminder
+Data objects to start with:
+```{r data reminder}
+split_data #data split in a proportion of 1/4 test and 3/4 training.
+#Assigned data sets from the split_data
+glimpse(training)
+glimpse(test)
+```
+#### Making a new recipe
+```{r}
+#Creating the recipe for continuous outcome (BodyTemp)
+BT_recipe <- recipe(BodyTemp ~ ., data = data)
+```
+Adjusting NEW model for continuous outcome?
+```{r new model}
+#making a path for the regression model
+lm_mod <- linear_reg() %>% 
+  set_engine("lm")
+
+lm_mod%>%
+  parameters()
+```
+Adjusting workflow for the model working with continuous outcome Body Temp
+```{r}
+#Creating a workflow that adds the model type and the recipe
+BT_wrkflow <- workflow() %>% 
+  add_model(lm_mod) %>% 
+  add_recipe(BT_recipe)
+
+#Creating a fit object
+BT_fit <- BT_wrkflow %>% fit(data = training)
+
+#Looking at the details of this fitted model
+BT_fit %>% extract_fit_parsnip() %>% tidy()
+```
+
+Now that we have a fitted object, we will apply it to the test data and predict some values.
+
+```{r predicting}
+#Showing the prediction proportions at each observation
+BT_aug1 <-augment(BT_fit, test)
+```
+#### Using the Root-mean square error (RMSE) to evaluate model fitness.
+```{r}
+
+#Using the test data set
+BT_aug1 %>% rmse(truth = BodyTemp, .pred)
+
+#Using the training data set
+BT_aug2 = augment(BT_fit, training) #updated model for training
+BT_aug2 %>% rmse(truth = BodyTemp, .pred)
+```
+RMSE using test data is estimated at 1.16
+RMSE using training data is estimated at 1.11
+
+### Fitting linear model between BodyTemp and Runny Nose
+#### Making a new recipe
+```{r}
+#Creating the recipe for BodyTemp and Runny Nose
+BT.RN_recipe <- recipe(BodyTemp ~ RunnyNose, data = data)
+```
+We're using the same linear regression model made above as lm_mod
+
+```{r}
+#Creating a workflow that adds the model type and the recipe I previously made
+BT.RN_wrkflow <- workflow() %>% 
+  add_model(lm_mod) %>% 
+  add_recipe(BT.RN_recipe)
+
+#Creating a fit object
+BT.RN_fit <- BT.RN_wrkflow %>% 
+  fit(data = training)
+
+#Looking at the details of this fitted model
+BT.RN_fit %>% 
+  extract_fit_parsnip() %>% 
+  tidy()
+```
+
+Now that we have a fitted object, we will apply it to the test data and predict some values.
+
+
+```{r}
+#Same as predict function but shows the prediction proportions at each observation
+BT.RN_aug = augment(BT.RN_fit, test)
+
+#Fitting a roc curve and looking at the roc-auc to determine if the model is a good fit.
+#Remember this is only using the runny nose main predictor
+
+#Using the test data set
+BT.RN_aug %>% rmse(truth = BodyTemp, .pred)
+
+#Using the training data set
+BT.RN_aug2 = augment(BT.RN_fit, training)
+BT.RN_aug2 %>% rmse(truth = BodyTemp, .pred)
+```
+RMSE is estimated as 1.08 for the test data model.
+RMSE is estimated 1.22 for the training data model.
+
+#### Summary
+
+The Root Mean Square Error (RMSE) assess how well a regression model fits a dataset by telling us the average distance between the predicted values from the model and actual values in the dataset. The lower the RMSE the better a given model is able to fit.
+
+When comparing the model using the test data we see that the RMSE is lower when the predictor is limited to one value (RunnyNose, 1.08) compared to when all symptoms are used as predictors (All symptoms, 1.16). 
+The opposite is true when using the training data (RunnyNose, 1.22; All symptoms, 1.11). 
+The data suggests that the linear regression model for Body Temperature with the single predictor (symptoms of a runny nose) is better than the model using all symptoms as predictors.
+This seems counter to what we would assume would make a "good" model. When thought through further the RMSE value is only about "fit" and having many predictors causes more complications to fit than a single variable.
+Regardless, the estimates are very close with a difference of only 0.08. This suggests that there may be little difference between these linear models.
+
